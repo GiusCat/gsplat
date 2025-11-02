@@ -1,3 +1,5 @@
+# Script taken from https://github.com/spmallick/learnopencv
+
 import cv2
 import os
 import argparse

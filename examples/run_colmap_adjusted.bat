@@ -1,6 +1,8 @@
+rem Script taken from https://github.com/smartdatascan/gaussian-splatting-tutorial/tree/main
+
 rem === Set paths ===
-set COLMAP_PATH=C:\Users\user\Downloads\colmap-x64-windows-cuda\COLMAP.bat
-set DATA_PATH=C:\Users\user\Downloads\gaussian_bin_2
+set COLMAP_PATH=<PATH_TO_COLMAP_BAT>
+set DATA_PATH=<PATH_TO_ROOT_OF_PROJECT>
 set IMAGE_PATH=%DATA_PATH%\images
 set DB_PATH=%DATA_PATH%\colmap.db
 set SPARSE_PATH=%DATA_PATH%\sparse
