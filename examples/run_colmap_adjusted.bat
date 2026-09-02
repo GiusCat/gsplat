@@ -1,10 +1,11 @@
 rem Script taken from https://github.com/smartdatascan/gaussian-splatting-tutorial/tree/main
 
 rem === Set paths ===
-set COLMAP_PATH=<PATH_TO_COLMAP_BAT>
-set DATA_PATH=<PATH_TO_ROOT_OF_PROJECT>
+set COLMAP_PATH=C:\Users\user\Downloads\colmap-x64-windows-cuda\COLMAP.bat
+set GLOMAP_PATH=C:\Users\user\Downloads\glomap-x64-windows-cuda\bin\glomap.exe
+set DATA_PATH=C:\Users\user\Downloads\gaussian_lab
 set IMAGE_PATH=%DATA_PATH%\images
-set DB_PATH=%DATA_PATH%\colmap.db
+set DB_PATH=%DATA_PATH%\database.db
 set SPARSE_PATH=%DATA_PATH%\sparse
 
 rem === Create output folder if it doesn't exist ===
@@ -28,11 +29,16 @@ call %COLMAP_PATH% exhaustive_matcher ^
 
 rem === Step 3: Mapping ===
 echo Running mapper...
-call %COLMAP_PATH% mapper ^
+call %GLOMAP_PATH% mapper ^
     --database_path %DB_PATH% ^
     --image_path %IMAGE_PATH% ^
-    --output_path %SPARSE_PATH% ^
-    --Mapper.init_min_tri_angle 2 ^
-    --Mapper.init_min_num_inliers 4 ^
-    --Mapper.abs_pose_min_num_inliers 3 ^
-    --Mapper.abs_pose_max_error 8
+    --output_path %SPARSE_PATH%
+
+rem call %COLMAP_PATH% mapper ^
+rem     --database_path %DB_PATH% ^
+rem     --image_path %IMAGE_PATH% ^
+rem     --output_path %SPARSE_PATH% ^
+rem     --Mapper.init_min_tri_angle 2 ^
+rem     --Mapper.init_min_num_inliers 4 ^
+rem     --Mapper.abs_pose_min_num_inliers 3 ^
+rem     --Mapper.abs_pose_max_error 8

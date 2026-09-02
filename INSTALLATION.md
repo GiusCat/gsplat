@@ -43,6 +43,10 @@ Provando a eseguire il comando `cl` dovrebbe uscire un output simile al seguente
 Per Windows è possibile recuperare la versione eseguibile di COLMAP, anche compatibile con CUDA, dalla [repository GitHub](https://github.com/colmap/colmap/releases)
  - Nello ZIP c'è lo script `COLMAP.bat`, col doppio click si avvia la GUI oppure lo si può invocare da script
 
+## Download GLOMAP
+
+GLOMAP è una versione più veloce del mapper (terzo step) di COLMAP. Si possono scaricare i binaries già buildati dalla [repository Github](github.com/colmap/glomap/releases), dopodiché estrarre lo ZIP dove si preferisce
+
 ## Installazione Conda
 
 TODO mettere come si installa Conda, e come creare un ambiente
@@ -95,7 +99,7 @@ Infine, si possono installare tutte le altre dependencies:
     cd examples
     pip install -r requirements.txt
 
-### Fix errore pycolmap
+<!-- ### Fix errore pycolmap
 
 Su Windows è presente un errore in una dependency, legato a differenze nella logica di struct unpacking; per risolvere serve eseguire i seguenti comandi (viene installata una fork che risolve il problema):
 
@@ -103,43 +107,71 @@ Su Windows è presente un errore in una dependency, legato a differenze nella lo
     pip install git+https://github.com/mathijshenquet/pycolmap
 
 - TODO: mettere la dependency giusta direttamente in `requirements.txt`
+ -->
+## [Opzionale] Convertire video in immagini
 
-### [Opzionale] Convertire video in immagini
-
-Prima di lanciare COLMAP, è necessario avere una serie di immagini; se si ha un video, bisogna estrarre un buon numero di frame:
+Prima di lanciare COLMAP, è necessario avere una serie di immagini. E' possibile anche fare un video da cui estrarre i fotogrammi, eseguendo il seguente script:
 
     python examples\video2imgs.py --video_path <path_to_video> --output_dir <path_to_images> --fps <num_fps>
 
-### Run COLMAP
+### Raccomandazioni per una buona cattura:
 
-First, define the required environment variables and create the output folder:
+- Video 4k60, possibilmente senza cambi automatici di fuoco, esposizione, ecc
+- Video in formato orizzontale, per evitare render della scena con un orientamento sbagliato
+- Almeno 100 foto, non è necessario averne più di ~300 per un buon risultato (anche perché poi COLMAP ci mette più tempo)
 
-set COLMAP_PATH=<Path to installed colmap.bat>
-set DATA_PATH=<Path to dataset folder, e.g., plush-dog>
-set IMAGE_PATH=%DATA_PATH%\images
-set DB_PATH=%DATA_PATH%\colmap.db
-set SPARSE_PATH=%DATA_PATH%\sparse
+---
 
-mkdir %SPARSE_PATH%
+## Struttura del progetto
 
-### Run GSplat
+Creare una nuova cartella, che sarà la root del progetto, e posizionare il video (da cui verranno estratti i frames) al suo interno. La struttura del progetto sarà di questo tipo:
 
-Se tutto funziona, far partire il training
+    <root>/
+      \_ images/
+      \_ sparse/
+      \_ splat/
+      \_ database.db
+      \_ source_video.mp4
 
-python simple_trainer.py default ^
---absgrad --grow_grad2d 8e-4 ^
---eval_steps -1 ^
---data_factor 4 ^
---save_ply ^
---max_steps 7000 ^
---ply_steps 7000 ^
---data_dir C:\Users\user\Downloads\gaussian_bin_2 ^
---result_dir C:\Users\user\Downloads\gaussian_bin_2\splat
+## [Opzionale] Estrarre fotogrammi da sorgente video
+
+TODO
+
+## Run COLMAP+GLOMAP
+
+Lo script `examples/run_colmap_adjusted.bat` permette di far partire COLMAP e GLOMAP per la ricostruzione della scena tramite SfM. Nello script è necessario inserire il path corretto per COLMAP (`<COLMAP_ROOT>/COLMAP.bat`) e GLOMAP (`<GLOMAP_ROOT/bin/glomap.exe`>), così come la root del progetto. A questo punto è possibile far partire lo script, che genererà la cartella `sparse/` contenente l'output di SfM.
+
+## Run GSplat
+
+Se tutto funziona, far partire il training tramite
+
+    python simple_trainer.py default ^
+    --eval_steps 20000 40000 60000 ^
+    --data_factor 4 ^
+    --save_ply ^
+    --max_steps 70000 ^
+    --ply_steps 70000 ^
+    --data_dir C:\Users\user\Downloads\gaussian_lab ^
+    --result_dir C:\Users\user\Downloads\gaussian_lab\splat
+    
+
+
+--strategy.absgrad --strategy.grow_grad2d 8e-4 ^ -> fare test con o senza questo
 
 --ply_steps 25000 ^ -> check di poter omettere questo
 
-### Test vari
+## Test vari
 
 216 images, max_steps=15000, data_factor=4 -> 07:32
+
 555 images, max_steps=30000, data_factor=4 -> 23:00 circa mi pare
+
 341 images, max_steps=30000, data_factor=4 (video 4k60) -> 22:21
+
+128 images, max_steps=7000, data_factor=4, absgrad, grow_grad2d 8e-4 -> ~10min COLMAP, 4:13 training
+
+129 images, max_steps=35000, data_factor=4, absgrad, grow_grad2d 8e-4 -> ~5min COLMAP, 15min training
+
+585 images, max_steps=70000, data_factor=4 -> ~20min COLGLOMAP, 38min training (~1.2mln splats)
+
+**NB** Fare attenzione al motion blur!! Andare con calma
